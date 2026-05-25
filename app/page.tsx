@@ -1,65 +1,165 @@
-import Image from "next/image";
+// import { supabaseAdmin } from '@/lib/supabase';
+// import { Letter } from '@/types';
+// import NavBar from '@/components/NavBar';
+// import LettersGrid from '@/components/LettersGrid';
 
-export default function Home() {
+// export const dynamic = 'force-dynamic';
+
+// async function getLetters(): Promise<Letter[]> {
+//   const { data, error } = await supabaseAdmin
+//     .from('public_letters')
+//     .select('*')
+//     .order('created_at', { ascending: false });
+
+//   if (error) {
+//     console.error('[page.tsx getLetters]', error.message);
+//     return [];
+//   }
+
+//   return (data ?? []).map(row => ({
+//     id: row.id,
+//     shareCode: row.share_code,
+//     to: row.recipient,
+//     from: row.author ?? undefined,
+//     content: row.content,
+//     flowers: row.flowers ?? [],
+//     handwriting: row.handwriting,
+//     createdAt: row.created_at,
+//   }));
+// }
+
+// async function getLetterByShareCode(code: string): Promise<Letter | null> {
+//   const { data } = await supabaseAdmin
+//     .from('public_letters')
+//     .select('*')
+//     .eq('share_code', code)
+//     .single();
+
+//   if (!data) return null;
+
+//   return {
+//     id: data.id,
+//     shareCode: data.share_code,
+//     to: data.recipient,
+//     from: data.author ?? undefined,
+//     content: data.content,
+//     flowers: data.flowers ?? [],
+//     handwriting: data.handwriting,
+//     createdAt: data.created_at,
+//   };
+// }
+
+// export default async function Home({
+//   searchParams,
+// }: {
+//   searchParams: Promise<{ note?: string }>;
+// }) {
+//   const { note } = await searchParams;
+
+//   const [letters, deepLinkedLetter] = await Promise.all([
+//     getLetters(),
+//     note ? getLetterByShareCode(note) : Promise.resolve(null),
+//   ]);
+
+//   return (
+//     <div className="min-h-screen flex flex-col">
+//       <NavBar />
+//       <LettersGrid letters={letters} initialOpenLetter={deepLinkedLetter} />
+//     </div>
+//   );
+// }
+
+import { supabaseAdmin } from '@/lib/supabase';
+import { Letter } from '@/types';
+import NavBar from '@/components/NavBar';
+import LettersGrid from '@/components/LettersGrid';
+
+// force-dynamic = every request hits DB fresh
+// This is what makes a newly published letter appear instantly
+export const dynamic = 'force-dynamic';
+
+const LETTERS_PER_PAGE = 12;
+
+async function getLetters(page: number): Promise<{ letters: Letter[]; total: number }> {
+  const from = (page - 1) * LETTERS_PER_PAGE;
+  const to = from + LETTERS_PER_PAGE - 1;
+
+  const { data, error, count } = await supabaseAdmin
+    .from('public_letters')
+    // ✅ Only fetch what the grid cards actually display
+    // content is NOT included here — saves huge payload on list view
+    .select('id, share_code, recipient, author, content,flowers, handwriting, created_at', {
+      count: 'exact', // gets total row count for pagination without a second query
+    })
+    .order('created_at', { ascending: false })
+    .range(from, to); // fetch only 12 rows, not thousands
+
+  if (error) {
+    console.error('[page.tsx getLetters]', error.message);
+    return { letters: [], total: 0 };
+  }
+
+  return {
+    letters: (data ?? []).map(row => ({
+      id: row.id,
+      shareCode: row.share_code,
+      to: row.recipient,
+      from: row.author ?? undefined,
+      content: row.content,
+      flowers: row.flowers ?? [],
+      handwriting: row.handwriting,
+      createdAt: row.created_at,
+    })),
+    total: count ?? 0,
+  };
+}
+
+async function getLetterByShareCode(code: string): Promise<Letter | null> {
+  const { data } = await supabaseAdmin
+    .from('public_letters')
+    .select('*')              // ✅ full fetch only for single letter detail view
+    .eq('share_code', code)
+    .single();
+
+  if (!data) return null;
+
+  return {
+    id: data.id,
+    shareCode: data.share_code,
+    to: data.recipient,
+    from: data.author ?? undefined,
+    content: data.content,
+    flowers: data.flowers ?? [],
+    handwriting: data.handwriting,
+    createdAt: data.created_at,
+  };
+}
+
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; note?: string }>;
+}) {
+  const { page: pageParam, note } = await searchParams;
+  const page = Math.max(1, parseInt(pageParam ?? '1'));
+
+  const [{ letters, total }, deepLinkedLetter] = await Promise.all([
+    getLetters(page),
+    note ? getLetterByShareCode(note) : Promise.resolve(null),
+  ]);
+
+  const totalPages = Math.ceil(total / LETTERS_PER_PAGE);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="min-h-screen flex flex-col">
+      <NavBar />
+      <LettersGrid
+        letters={letters}
+        currentPage={page}
+        totalPages={totalPages}
+        total={total}
+        initialOpenLetter={deepLinkedLetter}
+      />
     </div>
   );
 }

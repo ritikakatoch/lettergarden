@@ -1,36 +1,28 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌸 LetterGarden
 
-## Getting Started
+> *A digital garden where heartfelt letters bloom.*
 
-First, run the development server:
+LetterGarden is a space where people write short, decorated letters to the people they love — and plant them in a shared public garden for the world to read. No accounts required. No likes. No algorithm. Just words, flowers, and warmth.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ What It Does
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Write** a letter in your chosen handwriting style on textured paper
+- **Decorate** it with a bouquet of botanical flower stickers — arranged like a real bouquet peeking out of an envelope
+- **Plant it** in the public garden for strangers to discover, or keep it private
+- **share** share these letters with your loved ones
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠 Tech Stack
 
-## Learn More
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js 14 (App Router), TypeScript, Tailwind CSS |
+| Animation | Framer Motion |
+| Backend | Supabase (Postgres, Auth, Storage) |
+| Auth | Magic Link (passwordless) |
+| Deployment | Vercel |
+| Email | Resend |
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+*Built with care. Designed to feel slow on purpose.*
