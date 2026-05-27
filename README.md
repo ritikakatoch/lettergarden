@@ -2,7 +2,7 @@
 
 > *A digital garden where heartfelt letters bloom.*
 
-LetterGarden is a space where people write short, decorated letters to the people they love — and plant them in a shared public garden for the world to read. No accounts required. No likes. No algorithm. Just words, flowers, and warmth.
+LetterGarden is a space where people write short, decorated letters to the people they love — and plant them in a shared public garden for the world to read. No accounts required. No likes. No algorithm. Just words, flowers , and warmth .
 
 ---
 
