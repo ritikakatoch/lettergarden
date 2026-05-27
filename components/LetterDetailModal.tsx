@@ -54,7 +54,7 @@ export default function LetterDetailModal({ letter, onClose }: Props) {
                     justify-center
                     gap-8 sm:gap-10
                     w-full
-                    px-4 pt-6 pb-4 sm:px-8 sm:py-8
+                    px-4 pt-16 pb-4 sm:pt-20 sm:pb-8
                     mx-auto
                 ">
                     {/* Envelope */}

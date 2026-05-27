@@ -111,12 +111,17 @@ export default function EnvelopeCard({ letter, index = 0 }: EnvelopeCardProps) {
 
         {/* Layer 3: Paper Sheet — pops up on hover */}
         <motion.div
-          className="absolute left-[10%] w-[80%] h-[55%] z-30 px-8 py-10 flex flex-col shadow-sm rounded-sm"
+          className="absolute left-[10%] w-[80%] h-[55%] z-30  flex flex-col shadow-sm rounded-sm"
           style={{
             backgroundImage: `url(${ASSET_PAPER})`,
             backgroundSize: '100% 100%',
             fontFamily,
             top: '22%',
+            // padding: '10px 22px 16px',
+            paddingTop: '20px',
+            paddingBottom: '14px',
+            paddingLeft: '28px',
+            paddingRight: '28px',
           }}
           animate={{
             y: hovered ? '-28%' : '0%',
@@ -128,7 +133,8 @@ export default function EnvelopeCard({ letter, index = 0 }: EnvelopeCardProps) {
           }}
         >
           <p className="text-[14px] md:text-[15px] leading-[1.6] text-[#4a3e2c] line-clamp-[8] overflow-hidden">
-            {letter.content}
+            {/* {letter.content} */}
+            {letter.content.replace(/\s*\n+\s*/g, ' ')}
           </p>
           {letter.from && (
             <p className="text-right text-[12px] text-[#6a5a43] mt-auto pb-4 italic">

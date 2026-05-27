@@ -126,6 +126,11 @@ export default function EnvelopePreview({
             fontFamily,
             top: '26%',
             height: '55%',
+            // padding: '12px 28px 20px',
+            paddingTop: '20px',
+            paddingBottom: '14px',
+            paddingLeft: '28px',
+            paddingRight: '28px',
           }}
           animate={{
             y: hovered ? '-28%' : '0%',
@@ -148,7 +153,8 @@ export default function EnvelopePreview({
         overflow-hidden
       "
             >
-              {content}
+              {/* {content} */}
+              {content.replace(/\s*\n+\s*/g, ' ')}
             </p>
           ) : (
             <p className="text-[14px] text-[#000000] italic">
