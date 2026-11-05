@@ -227,7 +227,6 @@ function useLettersPerPage() {
 export default function LettersGrid({
     letters,
     currentPage: serverPage,
-    totalPages: _serverTotalPages,
     total: serverTotal,
     initialOpenLetter,
 }: {

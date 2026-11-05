@@ -31,7 +31,7 @@ interface EnvelopePreviewProps {
 }
 
 /* ✅ CENTER-FIRST + NO OVERFLOW */
-function calculateFlowerPosition(index: number, _total?: number) {
+function calculateFlowerPosition(index: number) {
   const center = 50;   // still centered
   const spacing = 5;
 
@@ -95,7 +95,7 @@ export default function EnvelopePreview({
         >
           <div className="relative w-full h-full" style={{ overflow: 'visible' }}>
             {flowers.map((src, i) => {
-              const { x, y, rotation, scale } = calculateFlowerPosition(i, flowers.length);
+              const { x, y, rotation, scale } = calculateFlowerPosition(i);
               return (
                 <motion.img
                   key={`flower-${i}`}

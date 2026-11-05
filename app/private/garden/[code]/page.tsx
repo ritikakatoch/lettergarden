@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Copy, Link2, Plus, Loader2 } from 'lucide-react';
 import LettersGrid from '@/components/LettersGrid';
@@ -27,36 +27,44 @@ export default function GardenPage() {
   const [copied, setCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
 
-  const fetchLetters = useCallback(async () => {
-    if (!code) return;
-    setLoading(true);
-    const res = await fetch(`/api/gardens/${code}/letters`);
-    if (res.ok) {
-      const data: ApiGardenLetter[] = await res.json();
-      setLetters(data.map((l) => ({
-        id: l.id,
-        shareCode: l.share_code,
-        to: l.recipient || '',
-        from: l.author || undefined,
-        content: l.content,
-        flowers: l.flowers || [],
-        handwriting: (l.handwriting as Letter['handwriting']) || 'dancing',
-        createdAt: l.created_at,
-      })));
-    }
-    setLoading(false);
-  }, [code]);
-
   useEffect(() => {
     if (!code) return;
-    fetch(`/api/gardens/${code}`)
-      .then(res => { if (!res.ok) window.location.replace('/private'); })
-      .catch(() => window.location.replace('/private'));
-  }, [code]);
+    let isMounted = true;
 
-  useEffect(() => {
-    if (code) fetchLetters();
-  }, [code, fetchLetters]);
+    fetch(`/api/gardens/${code}/letters`)
+      .then((res) => {
+        if (!res.ok) {
+          window.location.replace('/private');
+          return null;
+        }
+        return res.json();
+      })
+      .then((data: ApiGardenLetter[] | null) => {
+        if (!isMounted || !data) return;
+        setLetters(
+          data.map((l) => ({
+            id: l.id,
+            shareCode: l.share_code,
+            to: l.recipient || '',
+            from: l.author || undefined,
+            content: l.content,
+            flowers: l.flowers || [],
+            handwriting: (l.handwriting as Letter['handwriting']) || 'dancing',
+            createdAt: l.created_at,
+          }))
+        );
+        setLoading(false);
+      })
+      .catch(() => {
+        if (isMounted) {
+          window.location.replace('/private');
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [code]);
 
   function copyCode() {
     navigator.clipboard.writeText(code);
