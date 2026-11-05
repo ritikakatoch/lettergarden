@@ -1,10 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Copy, Link2, Plus, Loader2 } from 'lucide-react';
 import LettersGrid from '@/components/LettersGrid';
 import { Letter } from '@/types';
+
+interface ApiGardenLetter {
+  id: string;
+  share_code: string;
+  recipient?: string | null;
+  author?: string | null;
+  content: string;
+  flowers?: string[];
+  handwriting?: string;
+  created_at: string;
+}
 
 export default function GardenPage() {
   const params = useParams();
@@ -16,6 +27,26 @@ export default function GardenPage() {
   const [copied, setCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
 
+  const fetchLetters = useCallback(async () => {
+    if (!code) return;
+    setLoading(true);
+    const res = await fetch(`/api/gardens/${code}/letters`);
+    if (res.ok) {
+      const data: ApiGardenLetter[] = await res.json();
+      setLetters(data.map((l) => ({
+        id: l.id,
+        shareCode: l.share_code,
+        to: l.recipient || '',
+        from: l.author || undefined,
+        content: l.content,
+        flowers: l.flowers || [],
+        handwriting: (l.handwriting as Letter['handwriting']) || 'dancing',
+        createdAt: l.created_at,
+      })));
+    }
+    setLoading(false);
+  }, [code]);
+
   useEffect(() => {
     if (!code) return;
     fetch(`/api/gardens/${code}`)
@@ -25,26 +56,7 @@ export default function GardenPage() {
 
   useEffect(() => {
     if (code) fetchLetters();
-  }, [code]);
-
-  async function fetchLetters() {
-    setLoading(true);
-    const res = await fetch(`/api/gardens/${code}/letters`);
-    if (res.ok) {
-      const data = await res.json();
-      setLetters(data.map((l: any) => ({
-        id: l.id,
-        shareCode: l.share_code,
-        to: l.recipient || '',
-        from: l.author || undefined,
-        content: l.content,
-        flowers: l.flowers || [],
-        handwriting: l.handwriting || 'dancing',
-        createdAt: l.created_at,
-      })));
-    }
-    setLoading(false);
-  }
+  }, [code, fetchLetters]);
 
   function copyCode() {
     navigator.clipboard.writeText(code);

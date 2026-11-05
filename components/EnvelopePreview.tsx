@@ -31,7 +31,7 @@ interface EnvelopePreviewProps {
 }
 
 /* ✅ CENTER-FIRST + NO OVERFLOW */
-function calculateFlowerPosition(index: number, total: number) {
+function calculateFlowerPosition(index: number, _total?: number) {
   const center = 50;   // still centered
   const spacing = 5;
 

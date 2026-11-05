@@ -23,7 +23,7 @@ export default function AboutPage() {
           <p className="mb-0">&nbsp;</p>
 
           <p className="mb-0">
-            Every letter shared here is like a seed planted—it brightens someone's day, offers comfort, or simply says “I’m thinking of you.” There’s no rush, no pressure, no clutter—just space for care to grow.          </p>
+            Every letter shared here is like a seed planted—it brightens someone&apos;s day, offers comfort, or simply says &ldquo;I&apos;m thinking of you.&rdquo; There&apos;s no rush, no pressure, no clutter—just space for care to grow.          </p>
           <p className="mb-0">&nbsp;</p>
 
           <p className="mb-0">

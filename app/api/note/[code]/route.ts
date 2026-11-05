@@ -38,7 +38,18 @@ export async function GET(
     return NextResponse.json({ error: 'Letter not found' }, { status: 404 });
 }
 
-function rowToLetter(row: any) {
+interface DbLetterRow {
+    id: string;
+    share_code: string;
+    recipient?: string | null;
+    author?: string | null;
+    content: string;
+    flowers?: string[] | null;
+    handwriting?: string | null;
+    created_at: string;
+}
+
+function rowToLetter(row: DbLetterRow) {
     return {
         id: row.id,
         shareCode: row.share_code,

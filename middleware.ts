@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
-export function middleware(_req: NextRequest) {
+export function middleware() {
     const res = NextResponse.next();
 
     res.headers.set('X-Content-Type-Options', 'nosniff');

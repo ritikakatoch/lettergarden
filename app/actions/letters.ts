@@ -127,5 +127,6 @@ export async function submitLetterAction(data: {
   }
 
   // redirect() must be OUTSIDE try-catch
+  revalidatePath('/');
   redirect('/');
 }

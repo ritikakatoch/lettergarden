@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Copy, ArrowRight, Loader2 } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
 import NavBar from '@/components/NavBar';
-import Image from 'next/image';
 
 type Tab = 'visit' | 'create';
 
@@ -18,16 +17,8 @@ export default function PrivatePage() {
   const [visitLoading, setVisitLoading] = useState(false);
 
   // Create tab state
-  const [newCode, setNewCode] = useState('');
   const [createLoading, setCreateLoading] = useState(false);
-  const [copied, setCopied] = useState(false);
-
-  // ── Auto-generate on create tab ─────────────────────────
-  useEffect(() => {
-    if (tab === 'create' && !newCode && !createLoading) {
-      handleGenerate();
-    }
-  }, [tab]);
+  const [createError, setCreateError] = useState('');
 
   // ── Visit a garden ──────────────────────────────────────
   async function handleVisit() {
@@ -35,33 +26,38 @@ export default function PrivatePage() {
     setVisitLoading(true);
     setVisitError('');
 
-    const res = await fetch(`/api/gardens/${visitCode.toUpperCase()}`);
-    if (res.ok) {
-      router.push(`/private/garden/${visitCode.toUpperCase()}`);
-    } else {
-      setVisitError('Garden does not exist! Create a new garden');
+    try {
+      const res = await fetch(`/api/gardens/${visitCode.toUpperCase()}`);
+      if (res.ok) {
+        router.push(`/private/garden/${visitCode.toUpperCase()}`);
+      } else {
+        setVisitError('Garden does not exist! Create a new garden');
+      }
+    } catch {
+      setVisitError('Failed to check garden. Please try again.');
+    } finally {
+      setVisitLoading(false);
     }
-    setVisitLoading(false);
   }
 
-  // ── Create a new garden ──────────────────────────────────
-  async function handleGenerate() {
-    setCreateLoading(true);
-    const res = await fetch('/api/gardens/create', { method: 'POST' });
-    const data = await res.json();
-    setNewCode(data.code);
-    setCreateLoading(false);
-  }
-
+  // ── Create a new garden (only on user action) ────────────
   async function handleCreate() {
-    if (!newCode) return;
-    router.push(`/private/garden/${newCode}`);
-  }
+    setCreateLoading(true);
+    setCreateError('');
 
-  function copyCode() {
-    navigator.clipboard.writeText(newCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      const res = await fetch('/api/gardens/create', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok && data.code) {
+        router.push(`/private/garden/${data.code}`);
+      } else {
+        setCreateError(data.error || 'Could not create garden. Please try again.');
+        setCreateLoading(false);
+      }
+    } catch {
+      setCreateError('Network error. Please try again.');
+      setCreateLoading(false);
+    }
   }
 
   return (
@@ -73,7 +69,11 @@ export default function PrivatePage() {
         {(['visit', 'create'] as Tab[]).map((t) => (
           <button
             key={t}
-            onClick={() => setTab(t)}
+            onClick={() => {
+              setTab(t);
+              setVisitError('');
+              setCreateError('');
+            }}
             className={`px-8 py-2 rounded-[8px] text-[14px] font-poppins transition-all duration-200 ${tab === t
               ? 'bg-white text-black font-semibold shadow-sm'
               : 'text-[#8a7d6b] hover:text-[#3b3833] font-medium'
@@ -88,7 +88,7 @@ export default function PrivatePage() {
       {tab === 'visit' && (
         <div className="flex flex-col items-center gap-4 w-full max-w-sm mt-4">
           <img src="/stickers/053da0042a87d1643e1b1f3ba7d7337ec10eebed.png" alt="Flower" className="h-20 mb-2 drop-shadow-sm" />
-          <p className="font-poppins text-[16px] font-medium  text-black mb-2">
+          <p className="font-poppins text-[16px] font-medium text-black mb-2">
             Visit a private garden
           </p>
 
@@ -123,37 +123,34 @@ export default function PrivatePage() {
       {tab === 'create' && (
         <div className="flex flex-col items-center gap-4 w-full max-w-sm mt-4">
           <img src="/stickers/82e4a498284b6f5fabd4534c902441362e1cdc50.png" alt="Flower" className="h-20 mb-2 drop-shadow-sm" />
-          <p className="font-poppins text-[16px] font-medium  text-black mb-2">
+          <p className="font-poppins text-[16px] font-medium text-black mb-1">
             Create a new private garden
           </p>
+          <p className="font-poppins text-[13px] text-[#8a7d6b] text-center mb-2">
+            Start a shared private space with a unique code for your letters.
+          </p>
 
-          {(!newCode || createLoading) ? (
-            <div className="w-full flex items-center justify-center py-3">
-              <Loader2 size={24} className="animate-spin text-[#8a7d6b]" />
-            </div>
-          ) : (
-            <>
-              {/* Generated code display */}
-              <div className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-[8px] border border-[#e8e0d4] bg-white shadow-sm">
-                <span className="font-poppins text-[15px] font-semibold text-black">
-                  {newCode}
-                </span>
-                <button onClick={copyCode} className="text-[#3b3833] hover:text-black transition-colors">
-                  <Copy size={16} />
-                </button>
-                {copied && (
-                  <span className="text-[12px] text-green-600 font-poppins absolute ml-32">Copied!</span>
-                )}
-              </div>
-
-              <button
-                onClick={handleCreate}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-[8px] bg-black text-white font-poppins font-semibold text-[14px] hover:bg-[#1a1a1a] transition-all duration-300 shadow-md"
-              >
-                Create private garden <ArrowRight size={16} />
-              </button>
-            </>
+          {createError && (
+            <p className="text-red-500 text-[13px] font-poppins">{createError}</p>
           )}
+
+          <button
+            onClick={handleCreate}
+            disabled={createLoading}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-[8px] bg-black text-white font-poppins font-semibold text-[14px] hover:bg-[#1a1a1a] transition-all duration-300 shadow-md disabled:opacity-60 cursor-pointer"
+          >
+            {createLoading ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                <span>Creating garden...</span>
+              </>
+            ) : (
+              <>
+                <span>Create private garden</span>
+                <ArrowRight size={16} />
+              </>
+            )}
+          </button>
         </div>
       )}
     </div>
